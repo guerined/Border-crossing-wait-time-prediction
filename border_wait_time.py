@@ -3,7 +3,7 @@ Created on Tue Sep  4 15:50:07 2018
 
 @author: Peng Wang
 
-Build an XGBoost model to predict border crossing wait time at Peace Arch for each hour
+Build XGBoost model to predict border crossing wait time at Peace Arch for each hour
 Collected data from:
 - Border wait time:
 - USD/CAD exchange rate: https://fred.stlouisfed.org/series/DEXCAUS
@@ -63,6 +63,7 @@ data['ExchRate'].fillna(method='bfill', inplace=True)
 holidays_bc = pd.read_csv('./data/holidays_bc.csv')
 holidays_bc.rename(columns={'Holiday':'Holiday_bc'}, inplace=True)
 holidays_bc.replace(['Canada Day (observed)', 'New Year\'s Day'], ['Canada Day','New Year Day'], inplace=True)
+holidays_bc['Date'] = pd.to_datetime(holidays_bc['Date']).dt.date
 data = pd.merge(data, holidays_bc[['Date','Holiday_bc']], how='left', on='Date')
 
 holidays_wa = pd.read_csv('./data/holidays_wa.csv')
@@ -70,7 +71,19 @@ holidays_wa.rename(columns={'Holiday':'Holiday_wa'}, inplace=True)
 holidays_wa.replace(['Christmas Day (in lieu)', 'New Year\'s Day', 'Independence Day (observed)', 
                      'New Years Day Holiday', 'Veterans Day (observed)'], 
     ['Christmas Day','New Years Day','Independence Day','New Years Day','Veterans Day'], inplace=True)
+holidays_wa['Date'] = pd.to_datetime(holidays_wa['Date']).dt.date
 data = pd.merge(data, holidays_wa[['Date','Holiday_wa']], how='left', on='Date')
+
+'''
+# Holiday wait time visualization
+data['Holiday_bc'].fillna('', inplace=True)
+data['Holiday_wa'].fillna('', inplace=True)
+data['Holiday_combined'] = 'BC: ' + data['Holiday_bc'] + '\n WA: ' + data['Holiday_wa']
+data.groupby(['Holiday_combined'])['Delay'].mean().sort_values(ascending=True).tail(10).plot.barh()
+plt.xlabel('Minutes')
+plt.title('Border wait time on holidays' )
+data.drop(['Holiday_combined'], axis=1, inplace=True)
+'''
 
 # -----------  Data visualization ----------
 fig, axes = plt.subplots(2,2,figsize=(18,10))
@@ -92,6 +105,7 @@ axes[0].set_ylabel('Minutes')
 data.groupby(['Year'])['ExchRate'].mean().plot(ax=axes[1])
 axes[1].set_title('USD/CAD exchange rate')
 axes[1].set_ylabel('Exchange rate')
+
 # Convert holiday columns
 data = pd.get_dummies(data, columns=['Holiday_bc','Holiday_wa'])
 
@@ -157,4 +171,6 @@ xgb.plot_importance(booster_model)
 # Save prediction and model
 booster_model.save_model('./models/border_wait_time_xgb.model')
 pred.to_csv("./data/predictions.csv", index=False)
+
+# Prediction for 09/24-09/30
 
