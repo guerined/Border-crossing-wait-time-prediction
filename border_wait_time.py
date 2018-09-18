@@ -5,9 +5,9 @@ Created on Tue Sep  4 15:50:07 2018
 
 Build XGBoost model to predict border crossing wait time at Peace Arch for each hour
 Collected data from:
-- Border wait time:
-- USD/CAD exchange rate: https://fred.stlouisfed.org/series/DEXCAUS
-- Holidays: https://www.officeholidays.com/
+- Border wait time: Whatcom Council of Governments http://www.cascadegatewaydata.com/Crossing/
+- USD/CAD exchange rate: Federal Reserve Bank of St. Louis https://fred.stlouisfed.org/series/DEXCAUS
+- Statutory holidays: OfficeHolidays https://www.officeholidays.com/
 
 """
 
